@@ -3,6 +3,6 @@
 		DO NOT EDIT 
 -->
 # project-list
+show list of projects for a given github user/organisation
 
-
-***See <http://solsort.github.io/project-list> for details.***
+***See <http://project-list.solsort.com> for details.***
