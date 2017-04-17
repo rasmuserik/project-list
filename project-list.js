@@ -2,7 +2,7 @@
 //
 console.log('hello');
 
-async function cachedGithubRepos(user) {
+exports.cachedGithubRepos = async (user) => {
   let result = localStorage.getItem('githubRepos');
   let prevTime = +(localStorage.getItem('githubReposTimeStamp') || 0); 
   if(prevTime < Date.now() - 10 * 60 * 1000) {
@@ -20,44 +20,48 @@ async function cachedGithubRepos(user) {
     localStorage.setItem('githubReposTimeStamp', Date.now());
   }
   return JSON.parse(result);
-}
+};
 
-function renderRepos(repos) {
-  repos.sort((a,b) => a.created_at > b.created_at ? -1 : 1);
-  let entries = [];
-  for(let i = 0; i < repos.length; ++i) {
-    let repo = repos[i];
-    entries.push(`
-    <a 
-    style="
+exports.style = `
+.repoEntry {
     vertical-align: top;
     overflow: hidden;
     display: inline-block;
     font-size: 12px;
     text-decoration: none;
-    width: 120px;
+    width: 90px;
     height: 44px;
     padding: 0px 3px 0px 0px;
     margin: 0px;
-    "
-    href=${repo.homepage || ''}
-    >
-    <img style="
+    font-family: Ubuntu Condensed, sans-serif;
+}
+.repoEntry img {
     float: left;
-    margin-right: 8px;
+    margin-right: 6px;
     width: 32px;
     height: 32px;
-    "src=http://${repo.name}.solsort.com/icon.png>
-    <strong>${repo.name}</strong>
-    </div>
-    `);
-    console.log(repo.name);
+}
+`;
+
+exports.renderRepos = (repos) => {
+  repos.sort((a,b) => a.created_at > b.created_at ? -1 : 1);
+  let entries = [];
+  for(let i = 0; i < repos.length; ++i) {
+    let repo = repos[i];
+    entries.push(`
+    <a class=repoEntry
+    href=${'http://' + repo.name + '.solsort.com'}>
+    <img src=http://${repo.name}.solsort.com/icon.png>
+    ${repo.name.replace(/[_-]/g, ' ')}
+    </div>`);
   }
   return entries.join('');
-}
+};
 
 exports.main = async () => {
-  let repos = await cachedGithubRepos('solsort');
-  let str = renderRepos(repos);
-  window.app.innerHTML = str;
+  let repos = await exports.cachedGithubRepos('solsort');
+  let html = exports.renderRepos(repos);
+  window.app.innerHTML = '<style>' +
+    exports.style +  '</style>' +
+    html;
 }
