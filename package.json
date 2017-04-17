@@ -1,0 +1,18 @@
+{
+  "name": "project-list",
+  "scripts": {
+    "release": "simple-javascript release",
+    "dev": "simple-javascript dev",
+    "test": "simple-javascript test"
+  },
+  "devDependencies": {
+    "simple-javascript": "*"
+  },
+  "license": "MIT",
+  "main": "lib.js",
+  "unpkg": "dist.js",
+  "repository": "github:solsort/project-list",
+  "version": "0.0.1",
+  "homepage": "http://solsort.github.io/project-list",
+  "description": ""
+}
