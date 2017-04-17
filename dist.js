@@ -80,9 +80,77 @@ return /******/ (function(modules) { // webpackBootstrap
 /* 0 */
 /***/ (function(module, exports) {
 
+let cachedGithubRepos = (() => {
+  var _ref = _asyncToGenerator(function* (user) {
+    let result = localStorage.getItem('githubRepos');
+    let prevTime = +(localStorage.getItem('githubReposTimeStamp') || 0);
+    if (prevTime < Date.now() - 10 * 60 * 1000) {
+      let repos = [];
+      let current;
+      let i = 1;
+      do {
+        current = yield fetch(`https://api.github.com/users/${user}/repos?page=${i}`);
+        ++i;
+        current = yield current.json();
+        repos = repos.concat(current);
+      } while (current.length > 0);
+      result = JSON.stringify(repos);
+      localStorage.setItem('githubRepos', result);
+      localStorage.setItem('githubReposTimeStamp', Date.now());
+    }
+    return JSON.parse(result);
+  });
+
+  return function cachedGithubRepos(_x) {
+    return _ref.apply(this, arguments);
+  };
+})();
+
+function _asyncToGenerator(fn) { return function () { var gen = fn.apply(this, arguments); return new Promise(function (resolve, reject) { function step(key, arg) { try { var info = gen[key](arg); var value = info.value; } catch (error) { reject(error); return; } if (info.done) { resolve(value); } else { return Promise.resolve(value).then(function (value) { step("next", value); }, function (err) { step("throw", err); }); } } return step("next"); }); }; }
+
 // # project-list
 //
 console.log('hello');
+
+function renderRepos(repos) {
+  repos.sort((a, b) => a.created_at > b.created_at ? -1 : 1);
+  let entries = [];
+  for (let i = 0; i < repos.length; ++i) {
+    let repo = repos[i];
+    entries.push(`
+    <a 
+    style="
+    vertical-align: top;
+    overflow: hidden;
+    display: inline-block;
+    font-size: 12px;
+    text-decoration: none;
+    width: 120px;
+    height: 44px;
+    padding: 0px 3px 0px 0px;
+    margin: 0px;
+    "
+    href=${repo.homepage || ''}
+    >
+    <img style="
+    float: left;
+    margin-right: 8px;
+    width: 32px;
+    height: 32px;
+    "src=http://${repo.name}.solsort.com/icon.png>
+    <strong>${repo.name}</strong>
+    </div>
+    `);
+    console.log(repo.name);
+  }
+  return entries.join('');
+}
+
+exports.main = _asyncToGenerator(function* () {
+  let repos = yield cachedGithubRepos('solsort');
+  let str = renderRepos(repos);
+  window.app.innerHTML = str;
+});
 
 /***/ }),
 /* 1 */

@@ -3,4 +3,6 @@
 		DO NOT EDIT 
 -->
 # project-list
-undefined
+
+
+***See <http://solsort.github.io/project-list> for details.***
