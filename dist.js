@@ -163,14 +163,49 @@ exports.style = `
     width: 32px;
     height: 32px;
 }
+#solsortEntries a {
+display: inline-block;
+box-sizing: border-box;
+width: 110px;
+height: 50px;
+vertical-align: top;
+text-decoration: none;
+text-align: center;
+overflow: hidden;
+padding: 5px;
+font-size: 13px;
+}
+#solsortEntries .date {
+color: #ccc;
+font-size: 11px;
+}
 `;
 
 // ## Main/demo
 
+function dates() {
+  let nodes = document.getElementById('solsortEntries').children;
+  console.log(nodes, nodes.length, nodes[1].innerHTML);
+  for (let i = 0; i < nodes.length; ++i) {
+    let node = nodes[i].children[0];
+    if (node) {
+      let html = node.innerHTML;
+      console.log(node, nodes[i].children);
+      html = html.replace(/^20[0-9]+ [0-9]+ [0-9]+/, o => `<div class=date>${o.replace(/ /g, '-')}</div>`);
+      node.innerHTML = html;
+    }
+  }
+  console.log(parent.children);
+}
+
 exports.main = _asyncToGenerator(function* () {
+  let html = yield fetch('html.inc');
+  html = yield html.text();
+  window.app.innerHTML = `<style>${exports.style}</style>${html}`;
+  dates();
   let repos = yield exports.cachedGithubRepos('solsort');
-  let html = exports.renderRepos(repos, 'solsort.com');
-  window.app.innerHTML = '<style>' + exports.style + '</style>' + html;
+  html = exports.renderRepos(repos, 'solsort.com');
+  window.app.innerHTML += html;
 });
 
 /***/ }),

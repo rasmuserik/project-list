@@ -3,6 +3,6 @@
 		DO NOT EDIT 
 -->
 # project-list
-show list of projects for a given github user/organisation
+generate list of projects + blog-posts for solsort.com (fetching live from github + static-html)
 
 ***See <http://project-list.solsort.com> for details.***

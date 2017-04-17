@@ -1,6 +1,6 @@
 {
   "name": "project-list",
-  "description": "show list of projects for a given github user/organisation",
+  "description": "generate list of projects + blog-posts for solsort.com (fetching live from github + static-html)",
   "scripts": {
     "release": "simple-javascript release",
     "dev": "simple-javascript dev",
@@ -13,6 +13,6 @@
   "main": "lib.js",
   "unpkg": "dist.js",
   "repository": "github:solsort/project-list",
-  "version": "0.0.5",
+  "version": "0.0.7",
   "homepage": "http://project-list.solsort.com"
 }
