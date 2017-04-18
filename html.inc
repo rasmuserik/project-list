@@ -20,8 +20,8 @@
 <a href="/2017-04-10-simple-javascript">
 <div>2017 04 10 simple javascript</div>
 </a>
-<a href="/2017-03-09-building-for-the-future-broweser">
-<div>2017 03 09 building for the future broweser</div>
+<a href="/2017-03-09-building-for-the-future-browser">
+<div>2017 03 09 building for the future browser</div>
 </a>
 <a href="/2017-03-02-herkules">
 <div>2017 03 02 herkules</div>
