@@ -127,53 +127,43 @@ exports.cachedGithubRepos = (() => {
 //
 // We assume that `$REPOSITORY` has an icon at `http://$REPOSITORY.$DOMAIN/icon.png`, and a website at `http://$REPOSITORY.$DOMAIN/`.
 
-exports.renderRepos = (repos, domain) => {
+exports.renderRepos = (repos, domain, elem) => {
   repos.sort((a, b) => a.created_at > b.created_at ? -1 : 1);
   let entries = [];
   for (let i = 0; i < repos.length; ++i) {
     let repo = repos[i];
     entries.push(`
-    <a class=repoEntry
+    <a id=entry-${repo.name} style=text-align:left
     href=${'http://' + repo.name + '.' + domain}>
-    <img src=http://${repo.name}.${domain}/icon.png>
-    ${repo.name.replace(/[_-]/g, ' ')}
-    </div>`);
+      <div class=solsortRepos>
+      <img src=http://${repo.name}.${domain}/icon.png>
+      ${repo.name.replace(/[_-]/g, ' ')}
+      </div>
+    </a>`);
   }
-  return entries.join('');
+  elem.innerHTML = entries.join('') + entries.innerHTML;
 };
 
 // ## Styling
 
 exports.style = `
-.repoEntry {
-    vertical-align: top;
-    overflow: hidden;
-    display: inline-block;
-    font-size: 12px;
-    text-decoration: none;
-    width: 120px;
-    height: 44px;
-    padding: 0px 3px 0px 0px;
-    margin: 0px;
-    font-family: Ubuntu, sans-serif;
-}
-.repoEntry img {
+#solsortEntries img {
     float: left;
     margin-right: 6px;
     width: 32px;
     height: 32px;
 }
 #solsortEntries a {
-display: inline-block;
-box-sizing: border-box;
-width: 110px;
-height: 50px;
-vertical-align: top;
-text-decoration: none;
-text-align: center;
-overflow: hidden;
-padding: 5px;
-font-size: 13px;
+  display: inline-block;
+  box-sizing: border-box;
+  width: 110px;
+  height: 50px;
+  vertical-align: top;
+  text-decoration: none;
+  text-align: center;
+  overflow: hidden;
+  padding: 5px;
+  font-size: 13px;
 }
 #solsortEntries .date {
 color: #ccc;
@@ -204,8 +194,8 @@ exports.main = _asyncToGenerator(function* () {
   window.app.innerHTML = `<style>${exports.style}</style>${html}`;
   dates();
   let repos = yield exports.cachedGithubRepos('solsort');
-  html = exports.renderRepos(repos, 'solsort.com');
-  window.app.innerHTML += html;
+  let nodes = document.getElementById('solsortEntries');
+  exports.renderRepos(repos, 'solsort.com', nodes);
 });
 
 /***/ }),

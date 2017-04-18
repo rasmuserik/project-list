@@ -39,13 +39,13 @@ exports.cachedGithubRepos = async (user) => {
 //
 // We assume that `$REPOSITORY` has an icon at `http://$REPOSITORY.$DOMAIN/icon.png`, and a website at `http://$REPOSITORY.$DOMAIN/`.
 
-exports.renderRepos = (repos, domain) => {
+exports.renderRepos = (repos, domain, elem) => {
   repos.sort((a,b) => a.created_at > b.created_at ? -1 : 1);
   let entries = [];
   for(let i = 0; i < repos.length; ++i) {
     let repo = repos[i];
     entries.push(`
-    <a style=text-align:left
+    <a id=entry-${repo.name} style=text-align:left
     href=${'http://' + repo.name + '.' + domain}>
       <div class=solsortRepos>
       <img src=http://${repo.name}.${domain}/icon.png>
@@ -53,7 +53,7 @@ exports.renderRepos = (repos, domain) => {
       </div>
     </a>`);
   }
-  return entries.join('');
+  elem.innerHTML = entries.join('') + entries.innerHTML;
 };
 
 // ## Styling
@@ -108,9 +108,5 @@ exports.main = async () => {
   dates();
   let repos = await exports.cachedGithubRepos('solsort');
   let nodes = document.getElementById('solsortEntries');
-  nodes.innerHTML = exports.renderRepos(repos, 'solsort.com') + 
-    nodes.innerHTML;
-  Array.prototype.sort.call(nodes, (a, b) => 
-    a.textContent.trim() < b.textContent.trim() ? -1 : 1);
-  console.log('text', nodes.textContent);
+  exports.renderRepos(repos, 'solsort.com', nodes);
 }
