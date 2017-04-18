@@ -1,19 +1,17 @@
-// # project-list
+// # Project list
 //
 // Read and render repositories for a given github user/organisation.
 //
-// Motivation: I want an automatically updated list of projects on my web-page.
+// Motivation: I want an automatically updated list of projects on <http://solsort.com>.
 //
 // ## Retrieve repository list
 //
-// We cache the results to `localStorage` for 10 minutes, as only 60 requests are allowed per hour, for non-logged-in users.
+// We cache the results to `localStorage` for an hour, as only 60 requests are allowed per hour, for non-logged-in users.
 
 exports.cachedGithubRepos = async (user) => {
-
- 
   let result = localStorage.getItem('githubRepos');
   let prevTime = +(localStorage.getItem('githubReposTimeStamp') || 0); 
-  if(prevTime < Date.now() - 10 * 60 * 1000) {
+  if(prevTime < Date.now() - 60 * 60 * 1000) {
 
     let repos = []
     let current;
@@ -39,21 +37,28 @@ exports.cachedGithubRepos = async (user) => {
 //
 // We assume that `$REPOSITORY` has an icon at `http://$REPOSITORY.$DOMAIN/icon.png`, and a website at `http://$REPOSITORY.$DOMAIN/`.
 
-exports.renderRepos = (repos, domain, elem) => {
+exports.renderRepos = (repos, domain, parent) => {
   repos.sort((a,b) => a.created_at > b.created_at ? -1 : 1);
+  let nodes = parent.children;
   let entries = [];
   for(let i = 0; i < repos.length; ++i) {
     let repo = repos[i];
-    entries.push(`
-    <a id=entry-${repo.name} style=text-align:left
-    href=${'http://' + repo.name + '.' + domain}>
-      <div class=solsortRepos>
-      <img src=http://${repo.name}.${domain}/icon.png>
-      ${repo.name.replace(/[_-]/g, ' ')}
-      </div>
-    </a>`);
+
+    let j = 1;
+    while(j < nodes.length && nodes[j] &&
+      repo.created_at < nodes[j].textContent.trim()) {
+      ++j;
+    }
+    let elem = document.createElement('a');
+    elem.style.textAlign = 'left';
+    elem.href = 'http://' + repo.name + '.' + domain;
+    elem.id = 'entry-' + repo.name;
+    elem.innerHTML = `<div>
+    <img src=http://${repo.name}.${domain}/icon.png>
+    <div class=date>${repo.created_at.slice(0,10)}</div>
+    ${repo.name.replace(/-_/g, ' ')}</div>`;
+    parent.insertBefore(elem, nodes[j]);
   }
-  elem.innerHTML = entries.join('') + entries.innerHTML;
 };
 
 // ## Styling
@@ -62,51 +67,75 @@ exports.style = `
 #solsortEntries img {
     float: left;
     margin-right: 6px;
-    width: 32px;
-    height: 32px;
+    width: 40px;
+    height: 40px;
+    margin-bottom: 20px;
+    border-radius: 4px;
 }
 #solsortEntries a {
   display: inline-block;
   box-sizing: border-box;
-  width: 110px;
-  height: 50px;
+  width: 159px;
+  height: 60px;
   vertical-align: top;
   text-decoration: none;
-  text-align: center;
   overflow: hidden;
-  padding: 5px;
+  padding: 0px 10px 0px 10px;
+  text-align: center;
   font-size: 13px;
 }
 #solsortEntries .date {
-color: #ccc;
-font-size: 11px;
+  color: #ccc;
+  font-size: 11px;
 }
 `;
 
-// ## Main/demo
+// ## Format date on entries.
 
 function dates() {
   let nodes = document.getElementById('solsortEntries').children;
-  console.log(nodes, nodes.length, nodes[1].innerHTML);
   for(let i = 0; i < nodes.length; ++i) {
     let node = nodes[i].children[0];
     if(node) {
       let html = node.innerHTML;
-      console.log(node, nodes[i].children);
-      html = html.replace(/^20[0-9]+ [0-9]+ [0-9]+/, 
-        o => `<div class=date>${o.replace(/ /g, '-')}</div>`);
+      html = html.replace(/^(20[0-9]+ [0-9]+ [0-9]+)?/, 
+        o => `<div class=date>${o.replace(/ /g, '-')} <br></div>`);
       node.innerHTML = html;
     }
   }
-  console.log(parent.children);
 }
+
+// ## Update
+
+async function main() {
+  let elem = document.getElementById('solsortEntries');
+  if(elem) {
+    let style = document.getElementById('solsort-project-list-style');
+    if(!style) {
+      style = document.createElement('style');
+      style.innerHTML = exports.style;
+      style.id = 'solsort-project-list-style';
+      elem.insertBefore(style, elem.children[0]);
+    }
+    dates();
+    let repos = await exports.cachedGithubRepos('solsort');
+    let nodes = document.getElementById('solsortEntries');
+    exports.renderRepos(repos, 'solsort.com', nodes);
+  }
+}
+if(document.getElementById('solsortEntries')) {
+  main();
+}
+
+// ## Main
 
 exports.main = async () => {
   let html = await fetch('html.inc');
   html = await html.text();
-  window.app.innerHTML = `<style>${exports.style}</style>${html}`;
-  dates();
-  let repos = await exports.cachedGithubRepos('solsort');
-  let nodes = document.getElementById('solsortEntries');
-  exports.renderRepos(repos, 'solsort.com', nodes);
+  window.app.innerHTML = html;
+  window.app.style.height= '270px';
+  window.app.style.textAlign= 'center';
+  window.app.style.overflow= 'auto';
+  window.app.style.boxShadow= '2px 2px 8px rgba(0,0,0,0.5)';
+  main();
 }
